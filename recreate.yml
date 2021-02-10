@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 3
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      - name: configmap-volume
+        configMap:
+          name: nginxconfigmap
+      containers:
+      - name: nginxhttps
+        image: rprasad17088/deploynginx:v1
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        env:
+        - name: VERSION
+          value: v2.0
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume
+        - mountPath: /etc/nginx/conf.d
+          name: configmap-volume
